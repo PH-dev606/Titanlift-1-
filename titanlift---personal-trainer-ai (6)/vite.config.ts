@@ -6,6 +6,12 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    base: './', // Essencial para Capacitor (Android/iOS) e Vercel
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+      sourcemap: false
+    },
     define: {
       'process.env.API_KEY': JSON.stringify(env.API_KEY),
       'process.env': {}
