@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#020617">
     
     <!-- Security: Content Security Policy -->
+    <!-- Adicionado 'https://cdn-icons-png.flaticon.com' em img-src para permitir o novo ícone -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://esm.sh;
@@ -19,6 +20,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TitanLift">
+    
+    <!-- App Icons -->
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/15053/15053429.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/15053/15053429.png">
 
     <title>TitanLift</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -60,7 +65,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body>
     <div id="root"></div>
