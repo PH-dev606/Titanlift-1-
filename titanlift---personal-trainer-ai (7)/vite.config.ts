@@ -1,0 +1,20 @@
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, (process as any).cwd(), '');
+
+  return {
+    plugins: [react()],
+    base: './', // Essencial para Capacitor (Android/iOS) e Vercel
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+      sourcemap: false
+    },
+    define: {
+      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      'process.env': {}
+    }
+  };
+});
