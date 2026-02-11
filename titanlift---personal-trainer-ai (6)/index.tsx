@@ -47,7 +47,6 @@ import {
 import { WorkoutSession, PersonalRecord, ActiveExercise, WorkoutSet, WorkoutTemplate, Exercise } from './types';
 import { EXERCISES as DEFAULT_EXERCISES, WORKOUT_TEMPLATES as DEFAULT_TEMPLATES } from './constants';
 import { getMotivationalQuote, getExerciseTip, AiTipResponse, scanWorkoutFromImage } from './services/geminiService';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
 
 // --- Feedback Helpers ---
 
@@ -75,14 +74,14 @@ const playTickSound = () => {
 };
 
 const triggerHaptic = (type: 'light' | 'medium' | 'success' = 'light') => {
-  if (!window.navigator.vibrate) return;
-  
-  if (type === 'light') {
-    window.navigator.vibrate(15);
-  } else if (type === 'medium') {
-    window.navigator.vibrate(30);
-  } else if (type === 'success') {
-    window.navigator.vibrate([40, 30, 40]);
+  if (window.navigator && window.navigator.vibrate) {
+    if (type === 'light') {
+      window.navigator.vibrate(15);
+    } else if (type === 'medium') {
+      window.navigator.vibrate(30);
+    } else if (type === 'success') {
+      window.navigator.vibrate([40, 30, 40]);
+    }
   }
 };
 
@@ -395,8 +394,16 @@ const RestTimer = ({ exerciseId }: { exerciseId: string }) => {
   const PREF_SEC_KEY = `titanlift_pref_rest_sec_${exerciseId}`;
   const END_TIME_KEY = `titanlift_rest_end_${exerciseId}`;
 
-  const [minInput, setMinInput] = useState<number | ''>(() => parseInt(localStorage.getItem(PREF_MIN_KEY) || '1'));
-  const [secInput, setSecInput] = useState<number | ''>(() => parseInt(localStorage.getItem(PREF_SEC_KEY) || '30'));
+  const [minInput, setMinInput] = useState<number | ''>(() => {
+    try {
+      return parseInt(localStorage.getItem(PREF_MIN_KEY) || '1');
+    } catch { return 1; }
+  });
+  const [secInput, setSecInput] = useState<number | ''>(() => {
+    try {
+      return parseInt(localStorage.getItem(PREF_SEC_KEY) || '30');
+    } catch { return 30; }
+  });
   const [timeLeft, setTimeLeft] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
@@ -1189,17 +1196,19 @@ const ActiveWorkout = ({
 
   // Carregamento inicial do estado (Rascunho ou Memória de Carga ou Padrão)
   const [activeExercises, setActiveExercises] = useState<ActiveExercise[]>(() => {
-    const draft = localStorage.getItem(DRAFT_KEY);
-    if (draft) {
-      try { return JSON.parse(draft); } catch(e) { }
-    }
+    try {
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if (draft) {
+        return JSON.parse(draft);
+      }
+    } catch(e) { console.error("Erro ao carregar rascunho", e); }
     
     return template?.exercises.map(exId => {
-      const memoryKey = `titanlift_config_v2_${exId}`;
-      const memory = localStorage.getItem(memoryKey);
-      
-      if (memory) {
-        try {
+      try {
+        const memoryKey = `titanlift_config_v2_${exId}`;
+        const memory = localStorage.getItem(memoryKey);
+        
+        if (memory) {
           const config = JSON.parse(memory);
           return {
             exerciseId: exId,
@@ -1207,8 +1216,8 @@ const ActiveWorkout = ({
             sets: config.sets.map((s: any) => ({ ...s, completed: false })),
             notes: config.notes || ''
           };
-        } catch {}
-      }
+        }
+      } catch {}
 
       return {
         exerciseId: exId,
@@ -1658,18 +1667,24 @@ const ActiveWorkout = ({
 
 const App = () => {
   const [exercises, setExercises] = useState<Exercise[]>(() => {
-    const saved = localStorage.getItem('titanlift_exercises');
-    return saved ? JSON.parse(saved) : DEFAULT_EXERCISES;
+    try {
+      const saved = localStorage.getItem('titanlift_exercises');
+      return saved ? JSON.parse(saved) : DEFAULT_EXERCISES;
+    } catch { return DEFAULT_EXERCISES; }
   });
 
   const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => {
-    const saved = localStorage.getItem('titanlift_templates');
-    return saved ? JSON.parse(saved) : DEFAULT_TEMPLATES;
+    try {
+      const saved = localStorage.getItem('titanlift_templates');
+      return saved ? JSON.parse(saved) : DEFAULT_TEMPLATES;
+    } catch { return DEFAULT_TEMPLATES; }
   });
 
   const [sessions, setSessions] = useState<WorkoutSession[]>(() => {
-    const saved = localStorage.getItem('titanlift_sessions');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('titanlift_sessions');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
   });
 
   const prs = useMemo(() => {
